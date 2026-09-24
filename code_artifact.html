@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>血色詛咒備忘錄 - Creepy Sticky Notes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Horror Aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Creepster&family=Special+Elite&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom Typography */
+        .font-creepster { font-family: 'Creepster', cursive, 'Noto Serif TC', serif; }
+        .font-handwriting { font-family: 'Special Elite', 'Caveat', cursive, serif; }
+        .font-serif-tc { font-family: 'Noto Serif TC', serif; }
+
+        /* Background and Vignette Overlay */
+        body {
+            background-color: #080404;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(30, 0, 0, 0.4), rgba(0, 0, 0, 0.95)),
+                radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 0);
+            background-size: 100% 100%, 30px 30px;
+            color: #d1d5db;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Flickering Atmosphere Lighting Animation */
+        @keyframes subtleFlicker {
+            0%, 100% { opacity: 0.95; }
+            3%, 8% { opacity: 0.4; }
+            6% { opacity: 0.85; }
+            45% { opacity: 1; }
+            70%, 73% { opacity: 0.6; }
+            71% { opacity: 0.9; }
+        }
+
+        .flicker-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 20%, rgba(180, 0, 0, 0.08), rgba(0, 0, 0, 0.85));
+            pointer-events: none;
+            z-index: 10;
+            animation: subtleFlicker 8s infinite;
+        }
+
+        /* Blood Drop Stain Animation / Splatter */
+        .splatter {
+            position: absolute;
+            background-color: #800000;
+            border-radius: 50%;
+            opacity: 0.75;
+            filter: blur(1px);
+            pointer-events: none;
+            box-shadow: 0 0 8px #500;
+        }
+
+        /* Custom Sticky Note Themes */
+        .note-red {
+            background: linear-gradient(135deg, #4a0d0d 0%, #2b0505 100%);
+            border: 1px solid #7f1d1d;
+            color: #fca5a5;
+            box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(255, 0, 0, 0.2);
+        }
+        .note-green {
+            background: linear-gradient(135deg, #122b17 0%, #06140a 100%);
+            border: 1px solid #14532d;
+            color: #86efac;
+            box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        .note-purple {
+            background: linear-gradient(135deg, #2c123d 0%, #13051c 100%);
+            border: 1px solid #581c87;
+            color: #e9d5ff;
+            box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+        .note-corpse {
+            background: linear-gradient(135deg, #2d2f33 0%, #151719 100%);
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.08);
+        }
+        .note-ash {
+            background: linear-gradient(135deg, #33271e 0%, #17100a 100%);
+            border: 1px solid #78350f;
+            color: #fde68a;
+            box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(217, 119, 6, 0.15);
+        }
+
+        /* Rusty Nail Header Decoration for Notes */
+        .rusty-nail {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle, #8a4117 30%, #2b1104 80%);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.9), inset 0 0 4px #000;
+            z-index: 5;
+        }
+        .rusty-nail::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            border-top: 2px solid #d97706;
+            opacity: 0.6;
+        }
+
+        /* Note Hover Effects */
+        .sticky-note-card {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        }
+        .sticky-note-card:hover {
+            transform: scale(1.03) rotate(0deg) !important;
+            z-index: 30;
+            box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3), 0 0 15px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Disintegration / Burning Deletion Effect */
+        .disintegrate {
+            animation: burnFade 0.6s forwards ease-in;
+        }
+        @keyframes burnFade {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1) contrast(1);
+            }
+            50% {
+                filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5);
+                transform: scale(0.9) rotate(-5deg);
+            }
+            100% {
+                transform: scale(0) rotate(15deg);
+                opacity: 0;
+                filter: brightness(0);
+            }
+        }
+
+        /* Custom Scrollbar for Note Content */
+        textarea::-webkit-scrollbar {
+            width: 5px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #4a0d0d;
+            border-radius: 3px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #991b1b;
+        }
+
+        /* Creepy Button Glow */
+        .horror-btn {
+            background: linear-gradient(180deg, #4c0505 0%, #1a0000 100%);
+            border: 1px solid #991b1b;
+            box-shadow: 0 0 10px rgba(153, 27, 27, 0.4);
+            transition: all 0.2s ease;
+        }
+        .horror-btn:hover {
+            background: linear-gradient(180deg, #7f1d1d 0%, #320000 100%);
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        /* Creepy Pulsing Text */
+        .pulse-glowing-text {
+            text-shadow: 0 0 8px rgba(220, 38, 38, 0.8), 0 0 20px rgba(153, 27, 27, 0.5);
+            animation: textGlow 3s infinite alternate;
+        }
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px rgba(220, 38, 38, 0.6); }
+            100% { text-shadow: 0 0 22px rgba(239, 68, 68, 0.9), 0 0 35px rgba(185, 28, 28, 0.7); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-handwriting selection:bg-red-900 selection:text-white">
+
+    <!-- Ambient Lighting Effect Overlay -->
+    <div class="flicker-overlay"></div>
+
+    <!-- Background Blood Splatters Container -->
+    <div id="splatter-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <div class="max-w-7xl mx-auto relative z-20">
+        
+        <!-- Header Banner -->
+        <header class="text-center mb-8 relative">
+            <h1 class="font-creepster text-5xl md:text-7xl text-red-700 tracking-wider pulse-glowing-text mb-2">
+                血色詛咒備忘錄
+            </h1>
+            <p class="text-xs md:text-sm text-red-400/70 tracking-widest uppercase font-serif-tc">
+                ── 凡被刻下者，必留下痕跡 ‧ 印記永不消逝 ──
+            </p>
+        </header>
+
+        <!-- Control Panel -->
+        <div class="bg-black/70 border border-red-900/60 rounded-xl p-4 md:p-6 mb-10 backdrop-blur-md shadow-2xl">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                
+                <!-- Color Picker & Add Button -->
+                <div class="flex flex-wrap items-center justify-center gap-4 w-full lg:w-auto">
+                    <span class="text-red-200/80 font-serif-tc text-sm flex items-center gap-2">
+                        <i class="fa-solid font-xs text-red-600 fa-droplet"></i> 選擇印記顏色：
+                    </span>
+                    
+                    <!-- Color Swatches -->
+                    <div class="flex items-center gap-2" id="color-selector">
+                        <button data-color="note-red" title="血腥紅" class="color-opt w-8 h-8 rounded-full bg-red-900 border-2 border-red-500 scale-110 transition-transform focus:outline-none ring-2 ring-red-400"></button>
+                        <button data-color="note-green" title="腐敗綠" class="color-opt w-8 h-8 rounded-full bg-emerald-950 border-2 border-emerald-600 transition-transform hover:scale-110 focus:outline-none"></button>
+                        <button data-color="note-purple" title="幽冥紫" class="color-opt w-8 h-8 rounded-full bg-purple-950 border-2 border-purple-600 transition-transform hover:scale-110 focus:outline-none"></button>
+                        <button data-color="note-corpse" title="屍骨白" class="color-opt w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-400 transition-transform hover:scale-110 focus:outline-none"></button>
+                        <button data-color="note-ash" title="燼灰" class="color-opt w-8 h-8 rounded-full bg-amber-950 border-2 border-amber-600 transition-transform hover:scale-110 focus:outline-none"></button>
+                    </div>
+
+                    <!-- Create Note Button -->
+                    <button id="add-note-btn" class="horror-btn text-red-200 px-5 py-2.5 rounded-lg text-base font-serif-tc flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-skull text-red-500"></i>
+                        <span>滴血新增備忘錄</span>
+                    </button>
+                </div>
+
+                <!-- Search & Actions -->
+                <div class="flex items-center gap-4 w-full lg:w-auto justify-end">
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-red-800 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="搜尋邪惡印記..." 
+                               class="w-full pl-9 pr-3 py-2 bg-black/80 border border-red-950 rounded-lg text-sm text-red-200 placeholder-red-900 focus:outline-none focus:border-red-600 transition-colors">
+                    </div>
+
+                    <!-- Clear All Button -->
+                    <button id="clear-all-btn" class="px-4 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-900/50 text-red-400 hover:text-red-200 rounded-lg text-sm font-serif-tc flex items-center gap-2 transition-all whitespace-nowrap">
+                        <i class="fa-solid fa-fire"></i>
+                        <span>詛咒抹滅 (全清)</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sticky Notes Grid Board -->
+        <main>
+            <div id="notes-board" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 items-start">
+                <!-- Notes will be dynamically injected here -->
+            </div>
+
+            <!-- Empty Board Placeholder -->
+            <div id="empty-state" class="hidden text-center py-20 border-2 border-dashed border-red-950/60 rounded-2xl bg-black/40">
+                <i class="fa-solid fa-ghost text-6xl text-red-950 mb-4 animate-bounce"></i>
+                <h3 class="font-creepster text-3xl text-red-800 mb-2">寂靜無聲...</h3>
+                <p class="text-red-900 text-sm font-serif-tc">目前沒有任何詛咒印記。點擊「滴血新增備忘錄」來留下你的遺言。</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Store Sticky Notes Data Array
+        let notes = [];
+        let selectedColor = 'note-red';
+
+        // DOM Elements
+        const notesBoard = document.getElementById('notes-board');
+        const emptyState = document.getElementById('empty-state');
+        const addNoteBtn = document.getElementById('add-note-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const searchInput = document.getElementById('search-input');
+        const colorSelector = document.getElementById('color-selector');
+        const splatterContainer = document.getElementById('splatter-container');
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadNotesFromLocalStorage();
+            renderNotes();
+            generateRandomSplatters(6);
+
+            // Add Splatter on page click (aesthetic touch)
+            document.addEventListener('click', (e) => {
+                if (Math.random() < 0.15 && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('textarea')) {
+                    createClickSplatter(e.clientX, e.clientY);
+                }
+            });
+        });
+
+        // Color Selection Event
+        colorSelector.addEventListener('click', (e) => {
+            const btn = e.target.closest('.color-opt');
+            if (!btn) return;
+
+            document.querySelectorAll('.color-opt').forEach(b => {
+                b.classList.remove('scale-110', 'ring-2', 'ring-red-400');
+            });
+            btn.classList.add('scale-110', 'ring-2', 'ring-red-400');
+            selectedColor = btn.dataset.color;
+        });
+
+        // Add Note Click Handler
+        addNoteBtn.addEventListener('click', () => {
+            createNewNote();
+        });
+
+        // Clear All Notes Handler
+        clearAllBtn.addEventListener('click', () => {
+            if (notes.length === 0) return;
+            if (confirm('警告：此操作將徹底燒毀並抹滅所有備忘錄！確定要執行嗎？')) {
+                // Add burn effect to all visible notes
+                const noteElems = document.querySelectorAll('.sticky-note-card');
+                noteElems.forEach(el => el.classList.add('disintegrate'));
+                setTimeout(() => {
+                    notes = [];
+                    saveNotesToLocalStorage();
+                    renderNotes();
+                }, 550);
+            }
+        });
+
+        // Search Filter Event
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            renderNotes(query);
+        });
+
+        // Create New Note Object
+        function createNewNote() {
+            // Random tilt angle for eeriness (-4deg to 4deg)
+            const randomRotation = (Math.random() * 8 - 4).toFixed(1);
+            
+            const newNote = {
+                id: 'note_' + Date.now(),
+                title: '未命名詛咒',
+                content: '在夜深人靜之時...',
+                color: selectedColor,
+                rotation: randomRotation,
+                date: new Date().toLocaleDateString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            };
+
+            notes.unshift(newNote); // Add to beginning
+            saveNotesToLocalStorage();
+            renderNotes(searchInput.value.toLowerCase().trim());
+        }
+
+        // Save to LocalStorage
+        function saveNotesToLocalStorage() {
+            try {
+                localStorage.setItem('creepy_sticky_notes', JSON.stringify(notes));
+            } catch (err) {
+                console.error('LocalStorage Save Error:', err);
+            }
+        }
+
+        // Load from LocalStorage
+        function loadNotesFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('creepy_sticky_notes');
+                if (saved) {
+                    notes = JSON.parse(saved);
+                } else {
+                    // Default starter creepy notes
+                    notes = [
+                        {
+                            id: 'note_default_1',
+                            title: '血之戒律',
+                            content: '不要回頭看...\n牆角裡的陰影正在蠕動。',
+                            color: 'note-red',
+                            rotation: '-2.5',
+                            date: '午夜 00:00'
+                        },
+                        {
+                            id: 'note_default_2',
+                            title: '採購清單',
+                            content: '1. 黑蠟燭 x 3\n2. 烏鴉羽毛\n3. 鹽（用來畫陣圖）',
+                            color: 'note-ash',
+                            rotation: '1.8',
+                            date: '凌晨 03:33'
+                        }
+                    ];
+                    saveNotesToLocalStorage();
+                }
+            } catch (err) {
+                console.error('LocalStorage Load Error:', err);
+                notes = [];
+            }
+        }
+
+        // Update Note Title or Content
+        function updateNote(id, field, value) {
+            const noteIndex = notes.findIndex(n => n.id === id);
+            if (noteIndex !== -1) {
+                notes[noteIndex][field] = value;
+                saveNotesToLocalStorage();
+            }
+        }
+
+        // Delete Single Note with Disintegration Animation
+        function deleteNote(id, element) {
+            element.classList.add('disintegrate');
+            setTimeout(() => {
+                notes = notes.filter(n => n.id !== id);
+                saveNotesToLocalStorage();
+                renderNotes(searchInput.value.toLowerCase().trim());
+            }, 550);
+        }
+
+        // Render Notes to DOM
+        function renderNotes(filterQuery = '') {
+            notesBoard.innerHTML = '';
+
+            const filteredNotes = notes.filter(note => {
+                return note.title.toLowerCase().includes(filterQuery) || 
+                       note.content.toLowerCase().includes(filterQuery);
+            });
+
+            if (filteredNotes.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filteredNotes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = `sticky-note-card relative p-5 rounded-md ${note.color} flex flex-col justify-between min-h-[240px]`;
+                card.style.transform = `rotate(${note.rotation}deg)`;
+
+                card.innerHTML = `
+                    <div class="rusty-nail"></div>
+                    <div>
+                        <!-- Header & Delete Button -->
+                        <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+                            <input type="text" 
+                                   value="${escapeHtml(note.title)}" 
+                                   placeholder="標題..."
+                                   class="bg-transparent font-serif-tc font-bold text-lg w-full mr-2 focus:outline-none border-b border-transparent focus:border-red-500/50 transition-colors"
+                                   onchange="updateNote('${note.id}', 'title', this.value)">
+                            <button onclick="deleteNote('${note.id}', this.closest('.sticky-note-card'))" 
+                                    title="抹滅此備忘錄" 
+                                    class="text-red-400/60 hover:text-red-500 p-1 hover:scale-125 transition-all focus:outline-none">
+                                <i class="fa-solid fa-skull-crossbones text-base"></i>
+                            </button>
+                        </div>
+
+                        <!-- Editable Content Textarea -->
+                        <textarea placeholder="寫下詛咒備忘內容..." 
+                                  class="w-full bg-transparent resize-none h-32 focus:outline-none font-handwriting text-base leading-relaxed tracking-wide"
+                                  oninput="updateNote('${note.id}', 'content', this.value)">${escapeHtml(note.content)}</textarea>
+                    </div>
+
+                    <!-- Footer Date Info -->
+                    <div class="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-xs opacity-60 font-serif-tc">
+                        <span><i class="fa-regular fa-clock mr-1"></i>${note.date}</span>
+                        <i class="fa-solid fa-claw-marks text-xs"></i>
+                    </div>
+                `;
+
+                notesBoard.appendChild(card);
+            });
+        }
+
+        // Helper: HTML Escaping to Prevent XSS
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Generate Background Ambient Blood Splatters
+        function generateRandomSplatters(count) {
+            for (let i = 0; i < count; i++) {
+                const size = Math.floor(Math.random() * 60) + 20;
+                const top = Math.floor(Math.random() * 90);
+                const left = Math.floor(Math.random() * 90);
+                
+                const splatter = document.createElement('div');
+                splatter.className = 'splatter';
+                splatter.style.width = `${size}px`;
+                splatter.style.height = `${size}px`;
+                splatter.style.top = `${top}%`;
+                splatter.style.left = `${left}%`;
+                splatter.style.opacity = (Math.random() * 0.2 + 0.05).toFixed(2);
+                splatterContainer.appendChild(splatter);
+            }
+        }
+
+        // Create Blood Splatter on User Click
+        function createClickSplatter(x, y) {
+            const size = Math.floor(Math.random() * 30) + 15;
+            const splatter = document.createElement('div');
+            splatter.className = 'splatter';
+            splatter.style.width = `${size}px`;
+            splatter.style.height = `${size}px`;
+            splatter.style.left = `${x - size/2}px`;
+            splatter.style.top = `${y - size/2}px`;
+            splatter.style.opacity = '0.6';
+            splatter.style.transition = 'opacity 5s ease-out';
+            
+            splatterContainer.appendChild(splatter);
+
+            setTimeout(() => {
+                splatter.style.opacity = '0';
+                setTimeout(() => splatter.remove(), 5000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
